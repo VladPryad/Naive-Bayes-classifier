@@ -13,5 +13,5 @@ class Word(Document):
     hams = IntField()
     spamProb = FloatField()
     hamProb = FloatField()
-    spamProbNomalized = FloatField()
+    spamProbNormalized = FloatField()
     hamProbNormalized = FloatField()

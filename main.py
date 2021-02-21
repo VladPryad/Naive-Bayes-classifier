@@ -66,31 +66,69 @@ textStatus.pack(side = LEFT, padx = 10)
 def updateProbs(text, status):
     for word in text.split():
         try:
-            wordObj = Word.objects.get(word = word.lower())
-            
-        except Exception:
-            if(status.lower() == "ham"):
-                wordObj = Word(
-                word = word,
-                occurrences = 1,
-                hams = 1,
-                spams = 0,
-                spamProb = 0.0,
-                hamProb = 1.0,
-                spamProbNomalized = 0.25,
-                hamProbNomalized = 0.75
-                ).save()
-            if(status.lower() == "spam"):
-                wordObj = Word(
-                word = word,
-                occurrences = 1,
-                hams = 0,
-                spams = 1,
-                spamProb = 1.0,
-                hamProb = 0.0,
-                spamProbNomalized = 0.75,
-                hamProbNomalized = 0.25
-                ).save()
+            words = Word.objects.filter(word = word.lower())
+
+            if(len(words) != 0):
+                wordObj = words[0]
+                if(status.lower() == "ham"):
+                    spamProb = (wordObj.spams)/(wordObj.occurrences + 1)
+                    hamProb = (wordObj.hams + 1)/(wordObj.occurrences + 1)
+
+                    spamProbNormalized = ((wordObj.occurrences + 1) * spamProb + 0.5) / ((wordObj.occurrences + 1) + 1)
+                    hamProbNormalized = ((wordObj.occurrences + 1) * hamProb + 0.5) / ((wordObj.occurrences + 1) + 1)
+
+                    Word.objects(id = str(wordObj.pk)).update_one(
+                        inc__occurrences = 1,
+                        inc__hams = 1,
+                        spamProb = spamProb,
+                        hamProb = hamProb,
+                        spamProbNormalized = spamProbNormalized,
+                        hamProbNormalized = hamProbNormalized,
+                    )
+                if(status.lower() == "spam"):
+                    spamProb = (wordObj.spams + 1)/(wordObj.occurrences + 1)
+                    hamProb = (wordObj.hams)/(wordObj.occurrences + 1)
+
+                    spamProbNormalized = ((wordObj.occurrences + 1) * spamProb + 0.5) / ((wordObj.occurrences + 1) + 1)
+                    hamProbNormalized = ((wordObj.occurrences + 1) * hamProb + 0.5) / ((wordObj.occurrences + 1) + 1)
+
+                    Word.objects(id = str(wordObj.pk)).update_one(
+                        inc__occurrences = 1,
+                        inc__spams = 1,
+                        spamProb = spamProb,
+                        hamProb = hamProb,
+                        spamProbNormalized = spamProbNormalized,
+                        hamProbNormalized = hamProbNormalized,
+                    )
+                
+
+                wordObj.reload()
+            else:
+                if(status.lower() == "ham"):
+                    Word(
+                        word = word,
+                        occurrences = 1,
+                        hams = 1,
+                        spams = 0,
+                        spamProb = 0.0,
+                        hamProb = 1.0,
+                        spamProbNormalized = 0.25,
+                        hamProbNormalized = 0.75
+                    ).save()
+                if(status.lower() == "spam"):
+                    Word(
+                        word = word,
+                        occurrences = 1,
+                        hams = 0,
+                        spams = 1,
+                        spamProb = 1.0,
+                        hamProb = 0.0,
+                        spamProbNormalized = 0.75,
+                        hamProbNormalized = 0.25
+                    ).save()
+
+        except Exception as e:
+            print(e)
 
 saveButton = Button(tab1,text = "Save", width = 10)
 def save(text, status):
