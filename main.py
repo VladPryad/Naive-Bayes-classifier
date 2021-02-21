@@ -5,7 +5,7 @@ from tkinter import *
 import re
 import pandas as pd
 from utils.classifier import NaiveBayes
-from utils.db import Sample
+from utils.db import Sample, Word
 
 root = tk.Tk()
 root.geometry("1000x600")
@@ -62,11 +62,42 @@ text.pack(side = LEFT)
 textStatus = Text(tab1, width = 10, height = 2)
 textStatus.pack(side = LEFT, padx = 10)
 
+
+def updateProbs(text, status):
+    for word in text.split():
+        try:
+            wordObj = Word.objects.get(word = word.lower())
+            
+        except Exception:
+            if(status.lower() == "ham"):
+                wordObj = Word(
+                word = word,
+                occurrences = 1,
+                hams = 1,
+                spams = 0,
+                spamProb = 0.0,
+                hamProb = 1.0,
+                spamProbNomalized = 0.25,
+                hamProbNomalized = 0.75
+                ).save()
+            if(status.lower() == "spam"):
+                wordObj = Word(
+                word = word,
+                occurrences = 1,
+                hams = 0,
+                spams = 1,
+                spamProb = 1.0,
+                hamProb = 0.0,
+                spamProbNomalized = 0.75,
+                hamProbNomalized = 0.25
+                ).save()
+
 saveButton = Button(tab1,text = "Save", width = 10)
 def save(text, status):
     Sample(message = text, status = status).save()
     listbox.delete(0,END)
     insertItems()
+    updateProbs(text, status)
 
 saveButton.config(command = lambda: save(re.sub("^\s+|\n|\r|\s+$", '', text.get("1.0",END)), re.sub("^\s+|\n|\r|\s+$", '', textStatus.get("1.0",END))))
 saveButton.pack(expand = 1)
@@ -109,6 +140,5 @@ addButton.config(command = lambda: add())
 addButton.pack(side = RIGHT, padx = 10, expand = 1)  
 
 #endregion
-#for git
 
 root.mainloop()
