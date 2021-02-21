@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 import re
-import pandas as pd
 from utils.classifier import NaiveBayes
 from utils.db import Sample, Word
 
@@ -165,10 +164,17 @@ textToClassify.pack(side = LEFT, anchor = NE)
 
 classifyButton = Button(tab2,text = "Classify", width = 10)
 def classify():
-    pass
+    res = NaiveBayes.classify(textToClassify.get("1.0",END))
+    if(res[0] > res[1]):
+        resultLabel['text'] = "SPAM probability = " + str(res[0]) + "  ( ham " + str(res[1]) + ")"
+    else:
+        resultLabel['text'] = "HAM probability = " + str(res[1]) + "  ( spam " + str(res[0]) + ")"
 
 classifyButton.config(command = lambda: classify())
 classifyButton.pack( padx = 10, )
+
+resultLabel = Label(tab2, text="CLASSIFY ME")
+resultLabel.pack()
 
 addButton = Button(tab2,text = "Right", width = 10, bg = "green2")
 def add():
