@@ -1,6 +1,7 @@
 from mongoengine import *
+from .config import _DB
 
-connect(host='mongodb+srv://Vlad:naivebayes@samples.5hiaz.mongodb.net/test')
+connect(host=_DB)
 
 class Sample(Document):
     message = StringField()

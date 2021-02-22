@@ -159,29 +159,58 @@ listbox.bind('<<ListboxSelect>>',CurSelect)
 
 #region Tab 2
 
-textToClassify = Text(tab2, width = 75, height = 10)
+textToClassify = Text(tab2, width = 75, height = 20)
 textToClassify.pack(side = LEFT, anchor = NE)
 
+resultLabel = Label(tab2, text="CLASSIFY ME")
+resultLabel.pack(expand = 1, side = LEFT)
+resultLabel.place(anchor = W, y = 400,x = 50)
+
 classifyButton = Button(tab2,text = "Classify", width = 10)
+
+currentRes = ""
 def classify():
     res = NaiveBayes.classify(textToClassify.get("1.0",END))
+    k = 100 / (res[0] + res[1])
+    spam = res[0] * k
+    ham = res[1] * k
+    global currentRes
     if(res[0] > res[1]):
-        resultLabel['text'] = "SPAM probability = " + str(res[0]) + "  ( ham " + str(res[1]) + ")"
+        resultLabel['text'] = "SPAM probability = " + str(spam) + "%  ( ham " + str(ham) + "%)"
+        currentRes = "spam"
     else:
-        resultLabel['text'] = "HAM probability = " + str(res[1]) + "  ( spam " + str(res[0]) + ")"
+        resultLabel['text'] = "HAM probability = " + str(ham) + "%  ( spam " + str(spam) + "%)"
+        currentRes = "ham"
 
 classifyButton.config(command = lambda: classify())
-classifyButton.pack( padx = 10, )
+classifyButton.pack( padx = 10, pady = 50 )
 
-resultLabel = Label(tab2, text="CLASSIFY ME")
-resultLabel.pack()
+
 
 addButton = Button(tab2,text = "Right", width = 10, bg = "green2")
 def add():
-    pass
+    global currentRes
+    Sample(message = textToClassify.get("1.0",END), status = currentRes).save()
+    updateProbs(textToClassify.get("1.0",END), currentRes)
+    listbox.delete(0,END)
+    insertItems()
 
 addButton.config(command = lambda: add())
 addButton.pack(side = RIGHT, padx = 10, expand = 1)  
+addButton.place(y = 400, x = 550)
+
+rejectButton = Button(tab2,text = "Wrong", width = 10, bg = "red")
+def reject():
+    global currentRes
+    invRes = "spam" if currentRes == "ham" else "ham"
+    Sample(message = textToClassify.get("1.0",END), status = invRes).save()
+    updateProbs(textToClassify.get("1.0",END), invRes)
+    listbox.delete(0,END)
+    insertItems()
+
+rejectButton.config(command = lambda: reject())
+rejectButton.pack(side = RIGHT, padx = 10, expand = 1)  
+rejectButton.place(y = 400, x = 650)
 
 #endregion
 
