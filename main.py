@@ -23,20 +23,17 @@ tabControl.add(tab1, text = "Samples")
 tab2 = ttk.Frame(tabControl)
 tabControl.add(tab2, text = "Classifier")
 
-tab3 = ttk.Frame(tabControl)
-tabControl.add(tab3, text = "Plot")
-
 #region Tab 1
 
 OptionList = [
-"Aries",
-"Taurus",
-"Gemini",
-"Cancer"
+"DB1",
+"DB2",
+"DB3",
+"DB4"
 ] 
 
 variable = tk.StringVar(root)
-variable.set("None")
+variable.set(OptionList[0])
 
 opt = tk.OptionMenu(root, variable, *OptionList)
 opt.config(width=100, heigh = 1)
@@ -57,6 +54,7 @@ deleteButton.pack(side = RIGHT, padx = 10)
 
 text = Text(tab1, width = 75, height = 10)
 text.pack(side = LEFT)
+text.config(state = NORMAL)
 
 textStatus = Text(tab1, width = 10, height = 2)
 textStatus.pack(side = LEFT, padx = 10)
